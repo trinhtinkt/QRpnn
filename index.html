@@ -1,130 +1,240 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tạo VietQR</title>
 <style>
-body{font-family:system-ui,Arial,sans-serif;margin:0;background:#006B68;color:#006B68}.wrap{max-width:1000px;margin:auto;padding:20px}
-header{background:#006B68;color:white;padding:22px;border-radius:16px}section{background:white;border:1px solid #dbe3ee;border-radius:14px;padding:18px;margin:16px 0}
-label{display:block;font-weight:650;margin:10px 0 5px}input,select,button{font:inherit;padding:10px;border:1px solid #cbd5e1;border-radius:8px}input[type=file],select{width:100%;background:white}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-button{background:#006B68;color:white;border:0;cursor:pointer;font-weight:700}button.secondary{background:#e8eef7;color:#17385f}button:disabled{opacity:.45}
-.muted{color:#000000;font-size:.92rem}.note{background:#006B68;padding:12px;border-radius:8px}.status{white-space:pre-wrap;margin-top:12px}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.card{border:1px solid #dbe3ee;border-radius:12px;padding:12px;overflow-wrap:anywhere}.card img{display:block;width:180px;max-width:100%;margin:10px auto}
-@media(max-width:620px){.grid{grid-template-columns:1fr}.wrap{padding:12px}}
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b2430;--mut:#667085;--line:#d9dee6;--ac:#0b6b4f;--acx:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#12161c;--card:#1a2029;--tx:#e8ecf2;--mut:#9aa6b6;--line:#2c3644;--ac:#3ecf9a;--acx:#06281d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0 0 4px}h2{font-size:1.1rem;margin:0 0 12px}
+p{margin:0 0 12px;color:var(--mut)}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:16px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mut);flex:1 1 160px}
+input,select{font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--tx);width:100%}
+button{font:inherit;padding:9px 14px;border-radius:6px;border:1px solid var(--ac);background:var(--ac);color:var(--acx);cursor:pointer}
+button.alt{background:transparent;color:var(--ac)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#status{margin-top:10px;font-size:.9rem;min-height:1.3em}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:12px}
+.item{border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.item img{width:100%;background:#fff;border-radius:4px}
+.item small{color:var(--mut);word-break:break-all}
+.item .bar{margin-top:0}.item button{padding:5px 9px;font-size:.8rem}
+.note{font-size:.82rem}
 </style>
 </head>
-<body><div class="wrap">
-<header><h1>Tạo mã VietQR</h1><p>Đọc Excel trong trình duyệt, tạo QR hàng loạt, sao chép link hoặc tải ảnh QR.</p></header>
-<section><h2>1. Chọn file Excel</h2><p class="muted">Hỗ trợ .xlsx và .xls. File Excel được đọc trong trình duyệt, không tải lên GitHub.</p>
-<label for="file">File Excel</label><input id="file" type="file" accept=".xlsx,.xls,.xlsm">
-<div class="grid"><div><label for="sheet">Trang tính</label><select id="sheet" disabled></select></div><div><label for="headerRow">Dòng tiêu đề</label><input id="headerRow" value="1" inputmode="numeric"></div></div>
-<div id="mapping" class="grid"></div><div class="actions"><button id="generate" disabled>Tạo mã QR</button><button id="reset" class="secondary">Xóa dữ liệu</button></div><div id="status" class="status muted">Chưa chọn file.</div></section>
-<section><h2>2. Kết quả QR</h2><p class="note"><b>Lưu ý về link:</b> GitHub Pages không thể tự ghi ảnh tải lên vào repository. Link ảnh QR được phục vụ bởi dịch vụ VietQR, không phải ảnh được lưu vĩnh viễn trong GitHub. Link chứa thông tin chuyển khoản; chỉ chia sẻ khi phù hợp.</p>
-<div class="actions"><button id="downloadLinks" class="secondary" disabled>Tải danh sách link CSV</button><button id="downloadZip" disabled>Tải tất cả ảnh QR ZIP</button></div><div id="results" class="cards" style="margin-top:16px"></div></section>
-<p class="muted">BIDV BIN: 970418. Trước khi thanh toán, hãy quét thử và xác minh tài khoản nhận, số tiền, nội dung. Khi tạo QR, thông tin chuyển khoản sẽ được gửi trong yêu cầu đến img.vietqr.io.</p>
+<body>
+<main>
+<h1>Tạo mã VietQR</h1>
+<p>Đọc Excel trong trình duyệt, tạo QR hàng loạt, tải file Excel đã nhúng sẵn ảnh QR.</p>
+
+<section>
+<h2>1. Chọn file Excel</h2>
+<div class="row">
+<label>File Excel (.xlsx, .xls)<input type="file" id="file" accept=".xlsx,.xls"></label>
+<label>Trang tính<select id="sheet"></select></label>
+<label>Dòng tiêu đề<input type="number" id="hdr" min="1" value="1"></label>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<div class="row" style="margin-top:12px">
+<label>Cột số tài khoản<select id="cAcc"></select></label>
+<label>Cột số tiền<select id="cAmt"></select></label>
+<label>Cột nội dung<select id="cMsg"></select></label>
+<label>Cột tên người nhận<select id="cName"></select></label>
+</div>
+<div class="row" style="margin-top:12px">
+<label>Mã BIN ngân hàng (BIDV: 970418)<input id="bin" value="970418"></label>
+<label>Mẫu QR<select id="tpl"><option value="qr_only">Chỉ mã QR</option><option value="compact">Gọn</option><option value="compact2">Gọn có thông tin</option></select></label>
+</div>
+<div class="bar">
+<button id="gen" disabled>Tạo mã QR</button>
+<button id="clr" class="alt">Xóa dữ liệu</button>
+</div>
+<div id="status">Chưa chọn file.</div>
+</section>
+
+<section>
+<h2>2. Kết quả QR</h2>
+<div class="bar" style="margin-top:0">
+<button id="dlXlsx" disabled>Tải Excel kèm ảnh QR</button>
+<button id="dlCsv" class="alt" disabled>Tải danh sách link CSV</button>
+<button id="dlZip" class="alt" disabled>Tải tất cả ảnh QR ZIP</button>
+</div>
+<div id="grid"></div>
+<p class="note" style="margin-top:12px">Ảnh QR do img.vietqr.io tạo, nên thông tin chuyển khoản (tài khoản, số tiền, nội dung) được gửi tới dịch vụ này. Trước khi thanh toán, hãy quét thử và kiểm tra tài khoản nhận, số tiền, nội dung.</p>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-(()=>{
-const $=id=>document.getElementById(id),BIN="970418";
-const fields=[
-{key:"account",label:"Số tài khoản BIDV người nhận",aliases:["mã người chuyển","ma nguoi chuyen","mã người nhận","ma nguoi nhan","số tài khoản","so tai khoan","tài khoản nhận","tai khoan nhan","account"]},
-{key:"name",label:"Tên chủ tài khoản",aliases:["tên người chuyển","ten nguoi chuyen","tên người nhận","ten nguoi nhan","tên chủ tài khoản","ten chu tai khoan","account name","name"]},
-{key:"amount",label:"Số tiền chuyển",aliases:["số tiền chuyển","so tien chuyen","số tiền","so tien","amount"]},
-{key:"content",label:"Nội dung chuyển tiền",aliases:["nội dung chuyển tiền","noi dung chuyen tien","nội dung chuyển khoản","noi dung chuyen khoan","nội dung","noi dung","addinfo","description"]}
-];
-let wb=null,headers=[],rows=[],results=[];
-function norm(v){return String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase().replace(/[^a-z0-9]/g,"")}
-function clean(v){if(v==null)return "";if(typeof v==="number"&&Number.isFinite(v))return String(v);return String(v).trim()}
-function status(s){$("status").textContent=s}
-function guess(f){
- let a=f.aliases.map(norm);
- for(let i=0;i<headers.length;i++)if(a.includes(norm(headers[i])))return i;
- for(let i=0;i<headers.length;i++)if(a.some(x=>x&&(norm(headers[i]).includes(x)||x.includes(norm(headers[i])))))return i;
- return 0;
+const $ = id => document.getElementById(id);
+let wb = null, rows = [], head = [], results = [], baseName = "qr";
+
+const setStatus = t => $("status").textContent = t;
+const clean = s => String(s ?? "").trim();
+const norm = s => clean(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+
+function download(blob, name) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
-function mappings(){
- let root=$("mapping");root.innerHTML="";
- fields.forEach(f=>{
-  let d=document.createElement("div"),l=document.createElement("label"),s=document.createElement("select");
-  l.textContent=f.label;l.htmlFor="col_"+f.key;s.id="col_"+f.key;
-  headers.forEach((h,i)=>{let o=document.createElement("option");o.value=i;o.textContent=(i+1)+". "+(h||"(cột trống)");s.append(o)});
-  s.value=guess(f);d.append(l,s);root.append(d)
- })
+
+function loadSheet() {
+  const ws = wb.Sheets[$("sheet").value];
+  rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
+  buildColumns();
 }
-function loadSheet(){
- if(!wb)return;
- let sh=wb.Sheets[$("sheet").value];
- if(!sh){status("Không tìm thấy trang tính. Hãy chọn lại file Excel.");return}
- let matrix=XLSX.utils.sheet_to_json(sh,{header:1,raw:true,defval:""}),hn=Math.max(1,parseInt($("headerRow").value,10)||1);
- headers=(matrix[hn-1]||[]).map((x,i)=>clean(x)||"Cột "+(i+1));
- rows=matrix.slice(hn).filter(r=>r.some(v=>clean(v)!==""));
- mappings();$("generate").disabled=!headers.length;
- status("Đã đọc "+rows.length+" dòng dữ liệu. Kiểm tra ánh xạ cột trước khi tạo QR.")
+
+function buildColumns() {
+  const h = Math.max(1, +$("hdr").value || 1) - 1;
+  head = (rows[h] || []).map((v, i) => clean(v) || "Cột " + (i + 1));
+  const opts = (none) => (none ? '<option value="-1">(không dùng)</option>' : "") +
+    head.map((v, i) => `<option value="${i}">${v.replace(/</g, "&lt;")}</option>`).join("");
+  const guess = (keys, fallback) => {
+    const i = head.findIndex(v => keys.some(k => norm(v).includes(k)));
+    return i >= 0 ? i : fallback;
+  };
+  $("cAcc").innerHTML = opts(false); $("cAcc").value = guess(["so tai khoan", "stk", "account", "tai khoan"], 0);
+  $("cAmt").innerHTML = opts(true);  $("cAmt").value = guess(["so tien", "amount", "tien"], -1);
+  $("cMsg").innerHTML = opts(true);  $("cMsg").value = guess(["noi dung", "dien giai", "ghi chu", "message", "content"], -1);
+  $("cName").innerHTML = opts(true); $("cName").value = guess(["ten", "name", "chu tai khoan"], -1);
+  $("gen").disabled = head.length === 0;
+  setStatus(`Đã đọc ${Math.max(0, rows.length - h - 1)} dòng dữ liệu. Kiểm tra lại các cột rồi bấm "Tạo mã QR".`);
 }
-$("file").onchange=async e=>{
- let f=e.target.files[0];if(!f)return;
- try{
-  if(typeof XLSX==="undefined")throw Error("Không tải được thư viện đọc Excel. Kiểm tra kết nối Internet rồi tải lại trang.");
-  status("Đang đọc file Excel...");
-  wb=XLSX.read(await f.arrayBuffer(),{type:"array"});
-  $("sheet").innerHTML="";
-  if(!wb.SheetNames.length)throw Error("File không có trang tính đọc được.");
-  wb.SheetNames.forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n;$("sheet").append(o)});
-  $("sheet").disabled=false;loadSheet()
- }catch(err){status("Không đọc được file: "+err.message)}
-};
-$("sheet").onchange=loadSheet;$("headerRow").onchange=()=>{if(wb)loadSheet()};
-function urlFor(a,amt,c,n){
- let u=new URL("https://img.vietqr.io/image/"+BIN+"-"+encodeURIComponent(a)+"-compact2.png");
- if(amt!==""){let v=Number(String(amt).replace(/[ ,]/g,""));if(!Number.isFinite(v)||v<0)throw Error("Số tiền không hợp lệ: "+amt);u.searchParams.set("amount",String(Math.round(v)))}
- if(c)u.searchParams.set("addInfo",c);if(n)u.searchParams.set("accountName",n);return u.toString()
+
+$("file").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    wb = XLSX.read(await f.arrayBuffer(), { type: "array" });
+    baseName = f.name.replace(/\.[^.]+$/, "");
+    $("sheet").innerHTML = wb.SheetNames.map(n => `<option>${n.replace(/</g, "&lt;")}</option>`).join("");
+    loadSheet();
+  } catch (err) { setStatus("Không đọc được file: " + err.message); }
+});
+$("sheet").addEventListener("change", loadSheet);
+$("hdr").addEventListener("change", buildColumns);
+
+function qrUrl(acc, amt, msg, name) {
+  const p = new URLSearchParams();
+  if (amt) p.set("amount", amt);
+  if (msg) p.set("addInfo", msg);
+  if (name) p.set("accountName", name);
+  const q = p.toString();
+  return `https://img.vietqr.io/image/${$("bin").value.trim()}-${acc}-${$("tpl").value}.png` + (q ? "?" + q : "");
 }
-function safe(s){return String(s||"QR").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9_-]+/g,"_").slice(0,50)||"QR"}
-function render(){
- let root=$("results");root.innerHTML="";
- results.forEach(x=>{
-  let d=document.createElement("div");d.className="card";let h=document.createElement("b");h.textContent="Dòng Excel "+x.row+": "+(x.name||x.account);
-  let im=document.createElement("img");im.src=x.url;im.alt="VietQR BIDV";
-  let p=document.createElement("p");p.className="muted";p.textContent="TK: "+x.account+" · Số tiền: "+(x.amount||"không đặt trước");
-  let a=document.createElement("a");a.href=x.url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Mở ảnh QR";
-  let b=document.createElement("button");b.className="secondary";b.textContent="Sao chép link";
-  b.onclick=async()=>{try{await navigator.clipboard.writeText(x.url);b.textContent="Đã sao chép"}catch{prompt("Sao chép link:",x.url)}};
-  d.append(h,im,p,a,document.createElement("br"),b);root.append(d)
- });
- $("downloadLinks").disabled=!results.length;$("downloadZip").disabled=!results.length
-}
-$("generate").onclick=()=>{
- try{
-  let cols={};fields.forEach(f=>cols[f.key]=+$("col_"+f.key).value);
-  let hn=Math.max(1,parseInt($("headerRow").value,10)||1),out=[];
-  rows.forEach((r,i)=>{
-   let a=clean(r[cols.account]),n=clean(r[cols.name]),amt=clean(r[cols.amount]),c=clean(r[cols.content]);
-   if(!a&&!n&&!amt&&!c)return;
-   if(!a)throw Error("Dòng Excel "+(hn+i+1)+" thiếu số tài khoản BIDV người nhận.");
-   out.push({row:hn+i+1,account:a,name:n,amount:amt,content:c,url:urlFor(a,amt,c,n),filename:String(i+1).padStart(3,"0")+"_"+safe(n||a)+".png"})
+
+$("gen").addEventListener("click", () => {
+  const h = Math.max(1, +$("hdr").value || 1);
+  const iA = +$("cAcc").value, iM = +$("cAmt").value, iG = +$("cMsg").value, iN = +$("cName").value;
+  results = [];
+  rows.slice(h).forEach((r, k) => {
+    const acc = clean(r[iA]).replace(/\s/g, "");
+    if (!acc) return;
+    const amt = iM >= 0 ? clean(r[iM]).replace(/[^\d]/g, "") : "";
+    const msg = iG >= 0 ? clean(r[iG]) : "";
+    const name = iN >= 0 ? clean(r[iN]) : "";
+    results.push({ n: results.length + 1, row: r, acc, url: qrUrl(acc, amt, msg, name) });
   });
-  results=out;render();status("Đã tạo "+out.length+" link ảnh QR.\nHãy quét thử và xác minh thông tin trước khi dùng.")
- }catch(e){status("Không thể tạo QR: "+e.message)}
-};
-function save(blob,name){let a=document.createElement("a"),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
-$("downloadLinks").onclick=()=>{
- let data=[["Dòng Excel","Số tài khoản BIDV","Tên","Số tiền","Nội dung","Link ảnh QR"],...results.map(x=>[x.row,x.account,x.name,x.amount,x.content,x.url])];
- let csv="\uFEFF"+data.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
- save(new Blob([csv],{type:"text/csv;charset=utf-8"}),"vietqr_links.csv")
-};
-$("downloadZip").onclick=async()=>{
- let b=$("downloadZip");b.disabled=true;
- try{
-  if(typeof JSZip==="undefined")throw Error("Không tải được thư viện ZIP. Kiểm tra kết nối Internet.");
-  let zip=new JSZip();
-  for(let i=0;i<results.length;i++){let x=results[i],r=await fetch(x.url);if(!r.ok)throw Error("Không tải được ảnh dòng "+x.row);zip.file(x.filename,await r.blob());status("Đang tải ảnh "+(i+1)+"/"+results.length)}
-  save(await zip.generateAsync({type:"blob"}),"vietqr_bidv_images.zip");status("Đã tải ZIP gồm "+results.length+" ảnh QR.")
- }catch(e){status("Lỗi tải ảnh: "+e.message+".\nHãy thử mở từng link QR.")}finally{b.disabled=!results.length}
-};
-$("reset").onclick=()=>{wb=null;headers=[];rows=[];results=[];$("file").value="";$("sheet").innerHTML="";$("sheet").disabled=true;$("mapping").innerHTML="";$("results").innerHTML="";$("generate").disabled=true;$("downloadLinks").disabled=true;$("downloadZip").disabled=true;status("Đã xóa dữ liệu trên trang.")};
-})();
-</script></body></html>
+  const g = $("grid"); g.innerHTML = "";
+  results.forEach(x => {
+    const d = document.createElement("div"); d.className = "item";
+    d.innerHTML = `<img loading="lazy" alt="QR ${x.acc}" src="${x.url}"><strong>${x.acc}</strong><small>${x.url.replace(/</g, "")}</small><div class="bar"><button class="alt">Sao chép link</button><button class="alt">Tải ảnh</button></div>`;
+    const [b1, b2] = d.querySelectorAll("button");
+    b1.onclick = async () => { try { await navigator.clipboard.writeText(x.url); b1.textContent = "Đã sao chép"; } catch { prompt("Sao chép link:", x.url); } };
+    b2.onclick = async () => { try { download(await getBlob(x.url), `${x.n}_${x.acc}.png`); } catch (e) { setStatus("Không tải được ảnh: " + e.message); } };
+    g.appendChild(d);
+  });
+  ["dlXlsx", "dlCsv", "dlZip"].forEach(id => $(id).disabled = !results.length);
+  setStatus(results.length ? `Đã tạo ${results.length} mã QR.` : "Không có dòng nào có số tài khoản.");
+});
+
+async function getBlob(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.blob();
+}
+
+// Tải ảnh với số luồng giới hạn
+async function fetchAll(onProgress) {
+  let done = 0, i = 0;
+  const out = new Array(results.length);
+  async function worker() {
+    while (i < results.length) {
+      const k = i++;
+      out[k] = await (await getBlob(results[k].url)).arrayBuffer();
+      onProgress(++done);
+    }
+  }
+  await Promise.all(Array.from({ length: 5 }, worker));
+  return out;
+}
+
+$("dlXlsx").addEventListener("click", async () => {
+  const btn = $("dlXlsx"); btn.disabled = true;
+  try {
+    const bufs = await fetchAll(n => setStatus(`Đang tải ảnh QR ${n}/${results.length}...`));
+    const book = new ExcelJS.Workbook();
+    const ws = book.addWorksheet("VietQR");
+    const cols = head.length;
+    ws.addRow([...head, "Link QR", "Mã QR"]).font = { bold: true };
+    head.forEach((_, i) => ws.getColumn(i + 1).width = 22);
+    ws.getColumn(cols + 1).width = 40;
+    ws.getColumn(cols + 2).width = 26;
+    const SIZE = 150;
+    results.forEach((x, k) => {
+      const vals = head.map((_, i) => x.row[i] ?? "");
+      const row = ws.addRow([...vals, x.url, ""]);
+      row.height = SIZE * 0.75 + 6;
+      row.alignment = { vertical: "middle", wrapText: false };
+      const id = book.addImage({ buffer: bufs[k], extension: "png" });
+      ws.addImage(id, { tl: { col: cols + 1.08, row: k + 1.04 }, ext: { width: SIZE, height: SIZE } });
+    });
+    ws.views = [{ state: "frozen", ySplit: 1 }];
+    const buf = await book.xlsx.writeBuffer();
+    download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), baseName + "_VietQR.xlsx");
+    setStatus("Đã tải file Excel kèm ảnh QR.");
+  } catch (e) {
+    setStatus("Lỗi tạo Excel: " + e.message);
+  }
+  btn.disabled = false;
+});
+
+$("dlCsv").addEventListener("click", () => {
+  const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const lines = [["STT", "Số tài khoản", "Link QR"].map(esc).join(",")]
+    .concat(results.map(x => [x.n, x.acc, x.url].map(esc).join(",")));
+  download(new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" }), baseName + "_links.csv");
+});
+
+$("dlZip").addEventListener("click", async () => {
+  const btn = $("dlZip"); btn.disabled = true;
+  try {
+    const bufs = await fetchAll(n => setStatus(`Đang tải ảnh QR ${n}/${results.length}...`));
+    const zip = new JSZip();
+    bufs.forEach((b, k) => zip.file(`${results[k].n}_${results[k].acc}.png`, b));
+    download(await zip.generateAsync({ type: "blob" }), baseName + "_QR.zip");
+    setStatus("Đã tải file ZIP.");
+  } catch (e) { setStatus("Lỗi tạo ZIP: " + e.message); }
+  btn.disabled = false;
+});
+
+$("clr").addEventListener("click", () => {
+  wb = null; rows = []; head = []; results = [];
+  $("file").value = ""; $("grid").innerHTML = "";
+  ["sheet", "cAcc", "cAmt", "cMsg", "cName"].forEach(id => $(id).innerHTML = "");
+  ["gen", "dlXlsx", "dlCsv", "dlZip"].forEach(id => $(id).disabled = true);
+  setStatus("Chưa chọn file.");
+});
+</script>
+</body>
+</html>
