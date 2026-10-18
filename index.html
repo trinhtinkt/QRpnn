@@ -6,17 +6,17 @@
 <title>Tạo VietQR</title>
 <style>
 body{font-family:system-ui,Arial,sans-serif;margin:0;background:#006B68;color:#006B68}.wrap{max-width:1000px;margin:auto;padding:20px}
-header{background:#123b70;color:white;padding:22px;border-radius:16px}section{background:white;border:1px solid #dbe3ee;border-radius:14px;padding:18px;margin:16px 0}
+header{background:#006B68;color:white;padding:22px;border-radius:16px}section{background:white;border:1px solid #dbe3ee;border-radius:14px;padding:18px;margin:16px 0}
 label{display:block;font-weight:650;margin:10px 0 5px}input,select,button{font:inherit;padding:10px;border:1px solid #cbd5e1;border-radius:8px}input[type=file],select{width:100%;background:white}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-button{background:#1558a6;color:white;border:0;cursor:pointer;font-weight:700}button.secondary{background:#e8eef7;color:#17385f}button:disabled{opacity:.45}
-.muted{color:#607087;font-size:.92rem}.note{background:#fff5d9;padding:12px;border-radius:8px}.status{white-space:pre-wrap;margin-top:12px}
+button{background:#006B68;color:white;border:0;cursor:pointer;font-weight:700}button.secondary{background:#e8eef7;color:#17385f}button:disabled{opacity:.45}
+.muted{color:#006B68;font-size:.92rem}.note{background:#006B68;padding:12px;border-radius:8px}.status{white-space:pre-wrap;margin-top:12px}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.card{border:1px solid #dbe3ee;border-radius:12px;padding:12px;overflow-wrap:anywhere}.card img{display:block;width:180px;max-width:100%;margin:10px auto}
 @media(max-width:620px){.grid{grid-template-columns:1fr}.wrap{padding:12px}}
 </style>
 </head>
 <body><div class="wrap">
-<header><h1>Tạo mã VietQR BIDV từ Excel</h1><p>Đọc Excel trong trình duyệt, tạo QR hàng loạt, sao chép link hoặc tải ảnh QR.</p></header>
+<header><h1>Tạo mã VietQR</h1><p>Đọc Excel trong trình duyệt, tạo QR hàng loạt, sao chép link hoặc tải ảnh QR.</p></header>
 <section><h2>1. Chọn file Excel</h2><p class="muted">Hỗ trợ .xlsx và .xls. File Excel được đọc trong trình duyệt, không tải lên GitHub.</p>
 <label for="file">File Excel</label><input id="file" type="file" accept=".xlsx,.xls,.xlsm">
 <div class="grid"><div><label for="sheet">Trang tính</label><select id="sheet" disabled></select></div><div><label for="headerRow">Dòng tiêu đề</label><input id="headerRow" value="1" inputmode="numeric"></div></div>
